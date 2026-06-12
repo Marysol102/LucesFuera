@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luces Fuera</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Audiowide&display=swap');
+
+:root {
+  --bg:       #05061A;
+  --surface:  #0a0b28;
+  --surface2: #0f1035;
+  --border:   #1a1b40;
+  --border2:  #252560;
+  --sun:      #FFD166;
+  --sun-dim:  #e8950a;
+  --sun-glow: rgba(255,209,102,0.55);
+  --planet:   #0a0b28;
+  --text:     #c0c0e8;
+  --text-dim: #3a3a70;
+  --muted:    #2a2a58;
+  --hint:     #a78bfa;
+  --hint-glow:rgba(167,139,250,0.4);
+  --solve:    #67e8f9;
+  --solve-glow:rgba(103,232,249,0.35);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 16px 48px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Nebula */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 25%, rgba(90,40,160,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 65% at 85% 75%, rgba(20,70,160,0.15) 0%, transparent 65%),
+    radial-gradient(circle at 50% 50%, rgba(255,180,50,0.03) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* ── HEADER ── */
+header {
+  text-align: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+h1 {
+  font-family: 'Audiowide', sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sun);
+  line-height: 1;
+}
+
+.tagline {
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 5px;
+}
+
+/* ── DAY NAV ── */
+.day-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 7px 16px;
+}
+
+.day-nav button {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.15s;
+  font-family: 'Outfit', sans-serif;
+  line-height: 1;
+}
+
+.day-nav button:hover { color: var(--sun); }
+.day-nav button:disabled { opacity: 0.2; cursor: default; }
+
+.day-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.05em;
+  min-width: 110px;
+  text-align: center;
+}
+
+.day-label .day-num {
+  color: var(--sun);
+  font-size: 0.7rem;
+  display: block;
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+/* ── META ── */
+.meta {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.meta-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+.meta-val {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.meta-val.shape { color: var(--sun); font-size: 0.88rem; }
+
+/* ── GRID ── */
+#grid-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 260px;
+  margin-bottom: 20px;
+}
+
+#grid { display: grid; gap: 8px; }
+
+.cell {
+  border-radius: 50%;
+  background: #272a6e;
+  border: 1.5px solid #4e52a8;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+  position: relative;
+}
+
+.cell:not(.empty):active { transform: scale(0.88); }
+
+.cell.on {
+  background: radial-gradient(circle at 38% 32%, #fff5cc, var(--sun) 45%, var(--sun-dim));
+  border-color: var(--sun);
+  box-shadow: 0 0 18px var(--sun-glow), 0 0 5px var(--sun-glow);
+}
+
+.cell.empty {
+  background: transparent;
+  border: none;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Hint: violet ring */
+.cell.hint-marked {
+  border-color: var(--hint) !important;
+  box-shadow: 0 0 0 3px var(--hint-glow) !important;
+}
+
+/* Solve: cyan ring + step number */
+.cell.solve-marked {
+  border-color: var(--solve) !important;
+  box-shadow: 0 0 0 3px var(--solve-glow) !important;
+}
+
+.cell.solve-marked::after {
+  content: attr(data-step);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--solve);
+  pointer-events: none;
+}
+
+@keyframes solve-pulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.cell.solve-active { animation: solve-pulse 0.4s ease; }
+
+/* ── STATUS BAR ── */
+.status-bar {
+  min-height: 24px;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+}
+
+.status-bar .hl-hint { color: var(--hint); font-weight: 600; }
+.status-bar .hl-solve { color: var(--solve); font-weight: 600; }
+.status-bar strong { color: var(--text); }
+
+/* ── ACTIONS ── */
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+button {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 24px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+  letter-spacing: 0.03em;
+}
+
+button:not(:disabled):active { transform: scale(0.95); }
+button:disabled { opacity: 0.3; cursor: default; }
+
+.btn-primary {
+  background: var(--sun);
+  color: var(--bg);
+}
+
+.btn-hint {
+  background: var(--surface);
+  color: var(--hint);
+  border: 1px solid rgba(167,139,250,0.3);
+}
+.btn-hint:not(:disabled):hover { border-color: var(--hint); }
+
+.btn-solve {
+  background: var(--surface);
+  color: var(--solve);
+  border: 1px solid rgba(103,232,249,0.25);
+}
+.btn-solve:not(:disabled):hover { border-color: var(--solve); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+}
+.btn-ghost:not(:disabled):hover { color: var(--text); border-color: var(--border2); }
+
+/* Solve step controls */
+#solve-controls {
+  display: none;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+#solve-step-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--solve);
+  min-width: 80px;
+  text-align: center;
+}
+
+/* ── VICTORY OVERLAY ── */
+#victory {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5,6,26,0.88);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+
+#victory.show { display: flex; }
+
+.victory-card {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 40px 32px;
+  text-align: center;
+  max-width: 360px;
+  width: 92%;
+  animation: pop-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+  overflow: hidden;
+}
+
+.victory-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255,209,102,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+@keyframes pop-in {
+  from { transform: scale(0.82); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.victory-sun {
+  font-size: 3.2rem;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 12px var(--sun-glow));
+}
+
+.victory-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--sun);
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+
+.victory-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.victory-share {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  color: var(--text);
+  line-height: 1.8;
+  text-align: left;
+  white-space: pre-line;
+}
+
+.victory-stats {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+  line-height: 1.9;
+}
+
+.victory-stats strong { color: var(--text); }
+.victory-stats .perfect { color: var(--sun); }
+
+.victory-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--sun);
+  color: var(--bg);
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 0.83rem;
+  transition: transform 0.3s ease;
+  z-index: 200;
+  pointer-events: none;
+}
+
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Stars background dots */
+.stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  opacity: 0;
+  animation: twinkle var(--d) ease-in-out infinite var(--delay);
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.8); }
+  50% { opacity: var(--op); transform: scale(1); }
+}
+</style>
+</head>
+<body>
+
+<!-- Stars -->
+<div class="stars" id="stars"></div>
+
+<header>
+  <h1>LUCES FUERA</h1>
+  <p class="tagline">apaga todos los soles</p>
+</header>
+
+<!-- Day navigation -->
+<div class="day-nav">
+  <button id="btn-prev-day" title="Día anterior">←</button>
+  <div class="day-label">
+    <span id="day-date-label">—</span>
+    <span class="day-num" id="day-num-label"></span>
+  </div>
+  <button id="btn-next-day" title="Día siguiente">→</button>
+</div>
+
+<!-- Meta -->
+<div class="meta">
+  <div class="meta-item">
+    <span class="meta-label">Forma</span>
+    <span class="meta-val shape" id="shape-label">—</span>
+  </div>
+  <div class="meta-item">
+    <span class="meta-label">Toques</span>
+    <span class="meta-val" id="moves-count">0</span>
+  </div>
+</div>
+
+<!-- Grid -->
+<div id="grid-area">
+  <div id="grid"></div>
+</div>
+
+<!-- Status -->
+<div class="status-bar" id="status-bar"></div>
+
+<!-- Main actions -->
+<div class="actions">
+  <button class="btn-hint" id="btn-hint">✦ Pista</button>
+  <button class="btn-solve" id="btn-solve">◎ Solución</button>
+  <button class="btn-ghost" id="btn-reset">↺</button>
+</div>
+
+<!-- Solve step controls -->
+<div id="solve-controls">
+  <button class="btn-ghost" id="btn-solve-prev">← Anterior</button>
+  <span id="solve-step-label"></span>
+  <button class="btn-ghost" id="btn-solve-next">Siguiente →</button>
+  <button class="btn-ghost" id="btn-solve-cancel">✕</button>
+</div>
+
+<!-- Victory -->
+<div id="victory">
+  <div class="victory-card">
+    <div class="victory-sun">☀️</div>
+    <div class="victory-title">¡Luces fuera!</div>
+    <div class="victory-subtitle" id="victory-subtitle"></div>
+    <div class="victory-share" id="victory-share"></div>
+    <div class="victory-stats" id="victory-stats"></div>
+    <div class="victory-actions">
+      <button class="btn-primary" id="btn-copy-result">Copiar resultado</button>
+      <button class="btn-ghost" id="btn-close-victory">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+//  STARS
+// ══════════════════════════════════════
+(function() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 1.8 + 0.5;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%; top:${Math.random()*100}%;
+      --d:${(Math.random()*4+2).toFixed(1)}s;
+      --delay:-${(Math.random()*6).toFixed(1)}s;
+      --op:${(Math.random()*0.5+0.2).toFixed(2)};
+    `;
+    container.appendChild(s);
+  }
+})();
+
+// ══════════════════════════════════════
+//  PRNG
+// ══════════════════════════════════════
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ══════════════════════════════════════
+//  SHAPES
+// ══════════════════════════════════════
+const SHAPES = {
+  'Clásico 5×5': {
+    cols:5, cells:()=>{const a=[];for(let r=0;r<5;r++)for(let c=0;c<5;c++)a.push({r,c});return a;},
+    neighbors:(r,c)=>[[r-1,c],[r+1,c],[r,c-1],[r,c+1]]
+  },
+  'Pequeño 4×4': {
+    cols:4, cells:()=>{const a=[];for(let r=0;r<4;r++)for(let c=0;c<4;c++)a.push({r,c});return a;},
+    neighbors:(r,c)=>[[r-1,c],[r+1,c],[r,c-1],[r,c+1]]
+  },
+  'Grande 6×6': {
+    cols:6, cells:()=>{const a=[];for(let r=0;r<6;r++)for(let c=0;c<6;c++)a.push({r,c});return a;},
+    neighbors:(r,c)=>[[r-1,c],[r+1,c],[r,c-1],[r,c+1]]
+  },
+  'Cruz': {
+    cols:5,
+    cells:()=>[
+      {r:0,c:2},{r:1,c:1},{r:1,c:2},{r:1,c:3},
+      {r:2,c:0},{r:2,c:1},{r:2,c:2},{r:2,c:3},{r:2,c:4},
+      {r:3,c:1},{r:3,c:2},{r:3,c:3},{r:4,c:2}
+    ],
+    neighbors:(r,c)=>[[r-1,c],[r+1,c],[r,c-1],[r,c+1]]
+  },
+  'Diamante': {
+    cols:7,
+    cells:()=>{const a=[];for(let r=0;r<7;r++){const d=Math.abs(r-3);for(let c=d;c<=6-d;c++)a.push({r,c});}return a;},
+    neighbors:(r,c)=>[[r-1,c],[r+1,c],[r,c-1],[r,c+1]]
+  },
+  'Fila única': {
+    cols:9, cells:()=>Array.from({length:9},(_,i)=>({r:0,c:i})),
+    neighbors:(r,c)=>[[r,c-1],[r,c+1]]
+  },
+  'L grande': {
+    cols:5,
+    cells:()=>{const a=[];for(let r=0;r<5;r++)a.push({r,c:0});for(let c=1;c<5;c++)a.push({r:4,c});return a;},
+    neighbors:(r,c)=>[[r-1,c],[r+1,c],[r,c-1],[r,c+1]]
+  },
+  'Anillo': {
+    cols:5,
+    cells:()=>{const a=[];for(let r=0;r<5;r++)for(let c=0;c<5;c++)if(r===0||r===4||c===0||c===4)a.push({r,c});return a;},
+    neighbors:(r,c)=>[[r-1,c],[r+1,c],[r,c-1],[r,c+1]]
+  },
+  'Plus 3×3': {
+    cols:3,
+    cells:()=>[{r:0,c:1},{r:1,c:0},{r:1,c:1},{r:1,c:2},{r:2,c:1}],
+    neighbors:(r,c)=>[[r-1,c],[r+1,c],[r,c-1],[r,c+1]]
+  }
+};
+const SHAPE_NAMES = Object.keys(SHAPES);
+
+// ══════════════════════════════════════
+//  GF(2) SOLVER
+// ══════════════════════════════════════
+function solveGF2(cells, cellSet, neighbors, grid) {
+  const n = cells.length;
+  const idxOf = {};
+  cells.forEach((c,i) => idxOf[c.id] = i);
+
+  const A = Array.from({length:n}, ()=>new Uint8Array(n));
+  cells.forEach((cell,j) => {
+    A[j][j] ^= 1;
+    for(const [nr,nc] of neighbors(cell.r,cell.c)) {
+      const nid=`${nr},${nc}`;
+      if(cellSet.has(nid)) A[idxOf[nid]][j] ^= 1;
+    }
+  });
+
+  const b = new Uint8Array(n);
+  cells.forEach((c,i) => { b[i] = grid[c.id] ? 1 : 0; });
+
+  const M = A.map((row,i)=>{ const r=new Uint8Array(n+1); r.set(row); r[n]=b[i]; return r; });
+
+  const pivotRow = new Array(n).fill(-1);
+  let row = 0;
+  for(let col=0;col<n&&row<n;col++){
+    let pivot=-1;
+    for(let r2=row;r2<n;r2++){if(M[r2][col]===1){pivot=r2;break;}}
+    if(pivot===-1) continue;
+    [M[row],M[pivot]]=[M[pivot],M[row]];
+    pivotRow[col]=row;
+    for(let r2=0;r2<n;r2++){
+      if(r2!==row&&M[r2][col]===1)
+        for(let c2=0;c2<=n;c2++) M[r2][c2]^=M[row][c2];
+    }
+    row++;
+  }
+
+  for(let r2=row;r2<n;r2++) if(M[r2][n]===1) return null;
+
+  const x = new Uint8Array(n);
+  for(let col=n-1;col>=0;col--){
+    if(pivotRow[col]===-1){x[col]=0;continue;}
+    x[col]=M[pivotRow[col]][n];
+  }
+
+  return cells.filter((_,i)=>x[i]===1).map(c=>c.id);
+}
+
+// ══════════════════════════════════════
+//  DATE HELPERS
+// ══════════════════════════════════════
+const EPOCH = new Date(Date.UTC(2025,0,1)); // day 1 = 1 Jan 2025
+
+function dateToSeed(y,m,d) {
+  return y*10000 + (m+1)*100 + d;
+}
+
+function dateToDayNum(y,m,d) {
+  const ms = Date.UTC(y,m,d) - EPOCH.getTime();
+  return Math.floor(ms / 86400000) + 1;
+}
+
+function dateFromOffset(offsetFromToday) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetFromToday);
+  return { y:d.getFullYear(), m:d.getMonth(), d:d.getDate() };
+}
+
+function formatDate(y,m,d) {
+  return new Date(y,m,d).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+}
+
+// ══════════════════════════════════════
+//  PUZZLE GENERATION
+// ══════════════════════════════════════
+function buildShape(shapeName) {
+  const def = SHAPES[shapeName];
+  const cells = def.cells().map(p=>({...p,id:`${p.r},${p.c}`}));
+  const cellSet = new Set(cells.map(c=>c.id));
+  return {cells,cellSet,cols:def.cols,neighbors:def.neighbors};
+}
+
+function getDifficulty(shapeName, rng) {
+  const n = SHAPES[shapeName].cells().length;
+  const mn = Math.max(4,Math.floor(n*0.15));
+  const mx = Math.max(6,Math.floor(n*0.28));
+  return mn + Math.floor(rng()*(mx-mn+1));
+}
+
+function generatePuzzle(shapeName, seed, difficulty) {
+  const {cells,cellSet,cols,neighbors} = buildShape(shapeName);
+  const grid = {};
+  cells.forEach(c=>grid[c.id]=false);
+  const rng = mulberry32(seed);
+  const shuffled=[...cells];
+  for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+  const pressed=new Set();
+  for(const cell of shuffled){if(pressed.size>=difficulty)break;pressed.add(cell.id);}
+  for(const id of pressed){
+    const[r,c]=id.split(',').map(Number);
+    grid[id]=!grid[id];
+    for(const[nr,nc]of neighbors(r,c)){const nid=`${nr},${nc}`;if(cellSet.has(nid))grid[nid]=!grid[nid];}
+  }
+  return {cells,cellSet,cols,neighbors,grid};
+}
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+const state = {
+  shapeName:'', cells:[], cellSet:new Set(), neighbors:null, cols:5,
+  grid:{}, initialGrid:{}, optimalCount:0,
+  moves:0, hintsUsed:0,
+  dayOffset:0, // 0=today, -1=yesterday...
+  dateY:0, dateM:0, dateD:0,
+  solved:false,
+  solveMode:false, solvePath:[], solveStep:0, solveBaseGrid:{},
+  // persist per day
+  history:{} // key=dateStr -> {moves, hintsUsed, solved, shareEmojis}
+};
+
+// ══════════════════════════════════════
+//  CELL SIZE (responsive)
+// ══════════════════════════════════════
+function cellSize() {
+  const vw = Math.min(window.innerWidth, 480);
+  return Math.max(36, Math.min(52, Math.floor((vw - 60) / 6)));
+}
+
+// ══════════════════════════════════════
+//  LOAD PUZZLE FOR DAY
+// ══════════════════════════════════════
+function loadDay(offset) {
+  cancelSolveMode(false);
+  state.dayOffset = offset;
+  const {y,m,d} = dateFromOffset(offset);
+  state.dateY=y; state.dateM=m; state.dateD=d;
+
+  const seed = dateToSeed(y,m,d);
+  const dayNum = dateToDayNum(y,m,d);
+
+  // Pick shape from seed
+  const rngShape = mulberry32(seed + 99999);
+  const shapeName = SHAPE_NAMES[Math.floor(rngShape() * SHAPE_NAMES.length)];
+  const rngDiff = mulberry32(seed);
+  const difficulty = getDifficulty(shapeName, rngDiff);
+
+  const {cells,cellSet,cols,neighbors,grid} = generatePuzzle(shapeName, seed, difficulty);
+
+  state.shapeName = shapeName;
+  state.cells = cells;
+  state.cellSet = cellSet;
+  state.cols = cols;
+  state.neighbors = neighbors;
+  state.grid = grid;
+  state.initialGrid = {...grid};
+
+  // Real optimal via GF2
+  const sol = solveGF2(cells, cellSet, neighbors, grid);
+  state.optimalCount = sol ? sol.length : difficulty;
+
+  state.moves = 0;
+  state.hintsUsed = 0;
+  state.solved = false;
+
+  // Load saved progress if any
+  const key = `${y}-${m}-${d}`;
+  // (for sandbox we don't persist between reloads, but structure is ready)
+
+  renderGrid();
+  updateMeta(dayNum, y, m, d);
+  setStatus('');
+  hideVictory();
+  enableButtons();
+
+  // Prev/next nav
+  document.getElementById('btn-prev-day').disabled = false;
+  document.getElementById('btn-next-day').disabled = offset >= 0;
+}
+
+// ══════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════
+function renderGrid() {
+  const container = document.getElementById('grid');
+  const {cells,cellSet,cols} = state;
+  const rows = Math.max(...cells.map(c=>c.r))+1;
+  const cs = cellSize();
+
+  container.style.gridTemplateColumns = `repeat(${cols},${cs}px)`;
+  container.style.gridTemplateRows = `repeat(${rows},${cs}px)`;
+  container.innerHTML='';
+
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const id=`${r},${c}`;
+      const div=document.createElement('div');
+      div.className='cell';
+      div.dataset.id=id;
+      div.style.width=cs+'px';
+      div.style.height=cs+'px';
+      if(cellSet.has(id)){
+        if(state.grid[id]) div.classList.add('on');
+        div.addEventListener('click',()=>onCellClick(r,c));
+      } else {
+        div.classList.add('empty');
+      }
+      container.appendChild(div);
+    }
+  }
+}
+
+function updateCellDOM(id) {
+  const el=document.querySelector(`.cell[data-id="${id}"]`);
+  if(!el||el.classList.contains('empty')) return;
+  el.classList.toggle('on',!!state.grid[id]);
+}
+
+function updateMeta(dayNum,y,m,d) {
+  document.getElementById('shape-label').textContent = state.shapeName;
+  document.getElementById('moves-count').textContent = state.moves;
+  document.getElementById('day-date-label').textContent = formatDate(y,m,d);
+  document.getElementById('day-num-label').textContent = `Día #${dayNum}`;
+}
+
+function setStatus(html) {
+  document.getElementById('status-bar').innerHTML = html;
+}
+
+function enableButtons() {
+  document.getElementById('btn-hint').disabled = false;
+  document.getElementById('btn-solve').disabled = false;
+  document.getElementById('btn-reset').disabled = false;
+}
+
+// ══════════════════════════════════════
+//  CELL CLICK
+// ══════════════════════════════════════
+function onCellClick(r,c) {
+  const id=`${r},${c}`;
+  if(!state.cellSet.has(id)) return;
+
+  if(state.solveMode) {
+    if(state.solvePath[state.solveStep]===id) {
+      solveStepForward(); return;
+    }
+    // free press: recalculate
+    applyPress(id);
+    state.moves++;
+    document.getElementById('moves-count').textContent=state.moves;
+    const newSol=solveGF2(state.cells,state.cellSet,state.neighbors,state.grid);
+    if(!newSol||newSol.length===0){cancelSolveMode(false);checkVictory();}
+    else{state.solvePath=newSol;state.solveStep=0;state.solveBaseGrid={...state.grid};markSolveSteps();updateSolveStepUI();}
+    return;
+  }
+
+  if(state.solved) return;
+
+  applyPress(id);
+  state.moves++;
+  document.getElementById('moves-count').textContent=state.moves;
+  document.querySelectorAll('.cell.hint-marked').forEach(el=>el.classList.remove('hint-marked'));
+  setStatus('');
+  checkVictory();
+}
+
+function applyPress(id,updateDOM=true){
+  const[r,c]=id.split(',').map(Number);
+  state.grid[id]=!state.grid[id];
+  if(updateDOM) updateCellDOM(id);
+  for(const[nr,nc]of state.neighbors(r,c)){
+    const nid=`${nr},${nc}`;
+    if(state.cellSet.has(nid)){state.grid[nid]=!state.grid[nid];if(updateDOM)updateCellDOM(nid);}
+  }
+}
+
+// ══════════════════════════════════════
+//  HINT
+// ══════════════════════════════════════
+function doHint(){
+  if(state.solved||state.solveMode) return;
+  const sol=solveGF2(state.cells,state.cellSet,state.neighbors,state.grid);
+  if(!sol||sol.length===0){showToast('¡Ya está resuelto!');return;}
+  state.hintsUsed++;
+  document.querySelectorAll('.cell.hint-marked').forEach(el=>el.classList.remove('hint-marked'));
+  const el=document.querySelector(`.cell[data-id="${sol[0]}"]`);
+  if(el) el.classList.add('hint-marked');
+  setStatus(`<span class="hl-hint">✦ Pista</span> — pulsa la celda violeta · <strong>${sol.length}</strong> pasos restantes`);
+}
+
+// ══════════════════════════════════════
+//  SOLVE MODE
+// ══════════════════════════════════════
+function enterSolveMode(){
+  if(state.solved) return;
+  const sol=solveGF2(state.cells,state.cellSet,state.neighbors,state.grid);
+  if(!sol||sol.length===0){showToast('¡Ya está resuelto!');return;}
+  cancelSolveMode(false);
+  state.solveMode=true;
+  state.solvePath=sol;
+  state.solveStep=0;
+  state.solveBaseGrid={...state.grid};
+  document.getElementById('solve-controls').style.display='flex';
+  document.getElementById('btn-hint').disabled=true;
+  document.getElementById('btn-solve').disabled=true;
+  markSolveSteps();
+  updateSolveStepUI();
+  setStatus(`<span class="hl-solve">◎ Solución</span> — pulsa las celdas o usa los botones`);
+}
+
+function markSolveSteps(){
+  document.querySelectorAll('.cell.solve-marked').forEach(el=>{el.classList.remove('solve-marked','solve-active');delete el.dataset.step;});
+  for(let i=state.solveStep;i<state.solvePath.length;i++){
+    const el=document.querySelector(`.cell[data-id="${state.solvePath[i]}"]`);
+    if(el){el.classList.add('solve-marked');el.dataset.step=i+1;}
+  }
+}
+
+function updateSolveStepUI(){
+  const total=state.solvePath.length, cur=state.solveStep;
+  document.getElementById('solve-step-label').textContent=`${cur} / ${total}`;
+  document.getElementById('btn-solve-prev').disabled=cur===0;
+  document.getElementById('btn-solve-next').disabled=cur===total;
+  document.getElementById('btn-solve-next').textContent=cur===total-1?'Finalizar →':'Siguiente →';
+}
+
+function solveStepForward(){
+  if(state.solveStep>=state.solvePath.length) return;
+  const id=state.solvePath[state.solveStep];
+  const el=document.querySelector(`.cell[data-id="${id}"]`);
+  if(el){el.classList.remove('solve-marked');delete el.dataset.step;el.classList.add('solve-active');setTimeout(()=>el.classList.remove('solve-active'),400);}
+  applyPress(id);
+  state.solveStep++;
+  updateSolveStepUI();
+  if(state.solveStep===state.solvePath.length) setTimeout(()=>{cancelSolveMode(false);checkVictory();},350);
+}
+
+function solveStepBack(){
+  if(state.solveStep<=0) return;
+  state.solveStep--;
+  state.grid={...state.solveBaseGrid};
+  for(let i=0;i<state.solveStep;i++) applyPress(state.solvePath[i],false);
+  renderGrid();
+  markSolveSteps();
+  updateSolveStepUI();
+}
+
+function cancelSolveMode(reEnable=true){
+  if(!state.solveMode) return;
+  state.solveMode=false; state.solvePath=[]; state.solveStep=0;
+  document.getElementById('solve-controls').style.display='none';
+  document.querySelectorAll('.cell.solve-marked,.cell.solve-active').forEach(el=>{el.classList.remove('solve-marked','solve-active');delete el.dataset.step;});
+  if(reEnable) enableButtons();
+  setStatus('');
+}
+
+// ══════════════════════════════════════
+//  VICTORY
+// ══════════════════════════════════════
+function checkVictory(){
+  if(state.cells.every(c=>!state.grid[c.id])) triggerVictory();
+}
+
+
+
+function triggerVictory(){
+  state.solved=true;
+  cancelSolveMode(false);
+  document.getElementById('btn-hint').disabled=true;
+  document.getElementById('btn-solve').disabled=true;
+
+  const diff = state.moves - state.optimalCount;
+  const isPerfect = diff===0;
+  const qual = isPerfect ? '¡Perfecto! 🌟' : diff<=2 ? 'Muy bien ✨' : 'Completado ☀️';
+
+  const dayNum = dateToDayNum(state.dateY,state.dateM,state.dateD);
+  const hintsText = state.hintsUsed === 0 ? '✦ Sin pistas' : `Pistas: ${state.hintsUsed}`;
+  const shareText = `Luces Fuera · Día #${dayNum}\n${state.shapeName} · ${state.moves} toques (óptimo: ${state.optimalCount})\n${hintsText}`;
+
+  document.getElementById('victory-subtitle').textContent = `Día #${dayNum} · ${state.shapeName}`;
+  document.getElementById('victory-share').textContent = shareText;
+  document.getElementById('victory-stats').innerHTML = `
+    Toques: <strong>${state.moves}</strong> &nbsp;·&nbsp; Óptimo: <strong>${state.optimalCount}</strong><br>
+    Pistas usadas: <strong>${state.hintsUsed===0?'0 ✨':state.hintsUsed}</strong><br>
+    <span class="perfect">${qual}</span>
+  `;
+
+  document.getElementById('btn-copy-result').onclick = () => {
+    navigator.clipboard.writeText(shareText).then(()=>showToast('¡Copiado!')).catch(()=>showToast('No se pudo copiar'));
+  };
+
+  document.getElementById('victory').classList.add('show');
+}
+
+function hideVictory(){
+  document.getElementById('victory').classList.remove('show');
+}
+
+// ══════════════════════════════════════
+//  RESET
+// ══════════════════════════════════════
+function resetPuzzle(){
+  cancelSolveMode(false);
+  state.grid={...state.initialGrid};
+  state.moves=0;
+  state.hintsUsed=0;
+  state.solved=false;
+  document.querySelectorAll('.cell.hint-marked').forEach(el=>el.classList.remove('hint-marked'));
+  renderGrid();
+  document.getElementById('moves-count').textContent=0;
+  setStatus('');
+  enableButtons();
+}
+
+// ══════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ══════════════════════════════════════
+//  EVENT LISTENERS
+// ══════════════════════════════════════
+document.getElementById('btn-prev-day').addEventListener('click',()=>loadDay(state.dayOffset-1));
+document.getElementById('btn-next-day').addEventListener('click',()=>loadDay(state.dayOffset+1));
+document.getElementById('btn-hint').addEventListener('click',doHint);
+document.getElementById('btn-solve').addEventListener('click',enterSolveMode);
+document.getElementById('btn-reset').addEventListener('click',resetPuzzle);
+document.getElementById('btn-solve-next').addEventListener('click',solveStepForward);
+document.getElementById('btn-solve-prev').addEventListener('click',solveStepBack);
+document.getElementById('btn-solve-cancel').addEventListener('click',()=>cancelSolveMode(true));
+document.getElementById('btn-close-victory').addEventListener('click',hideVictory);
+
+window.addEventListener('resize',()=>{ renderGrid(); });
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+loadDay(0);
+</script>
+</body>
+</html>
