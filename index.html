@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Luces Fuera</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Audiowide&display=swap');
@@ -37,6 +37,10 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 28px 16px 48px;
+  padding-top: max(28px, env(safe-area-inset-top));
+  padding-bottom: max(48px, env(safe-area-inset-bottom));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
   position: relative;
   overflow-x: hidden;
 }
@@ -717,9 +721,12 @@ const state = {
 // ══════════════════════════════════════
 //  CELL SIZE (responsive)
 // ══════════════════════════════════════
-function cellSize() {
-  const vw = Math.min(window.innerWidth, 480);
-  return Math.max(36, Math.min(52, Math.floor((vw - 60) / 6)));
+function cellSize(cols) {
+  const gap = cols >= 8 ? 5 : cols >= 6 ? 6 : 8;
+  const usable = window.innerWidth - 32;
+  const gaps = (cols - 1) * gap;
+  const computed = Math.floor((usable - gaps) / cols);
+  return Math.max(28, Math.min(52, computed));
 }
 
 // ══════════════════════════════════════
@@ -780,8 +787,10 @@ function renderGrid() {
   const container = document.getElementById('grid');
   const {cells,cellSet,cols} = state;
   const rows = Math.max(...cells.map(c=>c.r))+1;
-  const cs = cellSize();
+  const cs = cellSize(cols);
 
+  const gap = cols >= 8 ? 5 : cols >= 6 ? 6 : 8;
+  container.style.gap = gap + 'px';
   container.style.gridTemplateColumns = `repeat(${cols},${cs}px)`;
   container.style.gridTemplateRows = `repeat(${rows},${cs}px)`;
   container.innerHTML='';
@@ -969,15 +978,25 @@ function triggerVictory(){
   const qual = isPerfect ? '¡Perfecto! 🌟' : diff<=2 ? 'Muy bien ✨' : 'Completado ☀️';
 
   const dayNum = dateToDayNum(state.dateY,state.dateM,state.dateD);
-  const hintsText = state.hintsUsed === 0 ? '✦ Sin pistas' : `Pistas: ${state.hintsUsed}`;
-  const shareText = `Luces Fuera · Día #${dayNum}\n${state.shapeName} · ${state.moves} toques (óptimo: ${state.optimalCount})\n${hintsText}`;
+  const diff = state.moves - state.optimalCount;
+  const qual = diff === 0 ? 'PERFECTO ⭐'
+             : diff <= 2  ? 'EXCELENTE'
+             : diff <= 5  ? 'MUY BIEN'
+             : diff <= 10 ? 'BUEN TRABAJO'
+             : diff <= 20 ? 'COMPLETADO'
+             :               'RESUELTO';
+  const hintsText = state.hintsUsed === 0 ? '' : `\n✦ Pistas usadas: ${state.hintsUsed}`;
+  const shareText = `☀️ LUCES FUERA ☀️\nDía #${dayNum} · ${qual}\n${state.shapeName} · ${state.moves} toques (óptimo: ${state.optimalCount})${hintsText}`;
 
   document.getElementById('victory-subtitle').textContent = `Día #${dayNum} · ${state.shapeName}`;
   document.getElementById('victory-share').textContent = shareText;
+  const hintsLine = state.hintsUsed === 0
+    ? `<span style="color:var(--hint)">✦ Sin pistas ✨</span>`
+    : `<span style="color:var(--hint)">✦ Pistas usadas: <strong>${state.hintsUsed}</strong></span>`;
   document.getElementById('victory-stats').innerHTML = `
     Toques: <strong>${state.moves}</strong> &nbsp;·&nbsp; Óptimo: <strong>${state.optimalCount}</strong><br>
-    Pistas usadas: <strong>${state.hintsUsed===0?'0 ✨':state.hintsUsed}</strong><br>
-    <span class="perfect">${qual}</span>
+    ${hintsLine}<br>
+    <span class="perfect" style="font-size:1rem;letter-spacing:0.08em">${qual}</span>
   `;
 
   document.getElementById('btn-copy-result').onclick = () => {
