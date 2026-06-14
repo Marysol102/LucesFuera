@@ -394,6 +394,271 @@ button:disabled { opacity: 0.3; cursor: default; }
 
 .victory-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
+/* ── HELP BUTTON ── */
+.help-btn {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  z-index: 50;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.help-btn:hover { color: var(--sun); border-color: var(--sun); }
+
+/* ── TUTORIAL MODAL ── */
+#tutorial {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5,6,26,0.9);
+  backdrop-filter: blur(8px);
+  z-index: 110;
+  justify-content: center;
+  align-items: center;
+}
+
+#tutorial.show { display: flex; }
+
+.tutorial-card {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  max-width: 380px;
+  width: 92%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: pop-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+}
+
+.tutorial-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255,209,102,0.07) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.tutorial-slides {
+  width: 100%;
+  position: relative;
+}
+
+.tutorial-slide {
+  display: none;
+  width: 100%;
+  padding: 32px 28px 16px;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.tutorial-slide.active {
+  display: flex;
+}
+
+.tutorial-eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.tutorial-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--sun);
+  letter-spacing: 0.02em;
+}
+
+.tutorial-text {
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.6;
+  max-width: 280px;
+}
+
+.tutorial-text strong { color: var(--sun); }
+.tutorial-text .t-hint { color: var(--hint); font-weight: 600; }
+.tutorial-text .t-solve { color: var(--solve); font-weight: 600; }
+
+/* Visual area */
+.tutorial-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 110px;
+  margin: 4px 0;
+}
+
+.demo-grid {
+  display: grid;
+  gap: 5px;
+}
+
+.demo-cell {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #272a6e;
+  border: 1.5px solid #4e52a8;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+  cursor: pointer;
+}
+
+.demo-cell.on {
+  background: radial-gradient(circle at 38% 32%, #fff5cc, var(--sun) 45%, var(--sun-dim));
+  border-color: var(--sun);
+  box-shadow: 0 0 10px var(--sun-glow);
+}
+
+.demo-cell.static { cursor: default; }
+.demo-cell.static:active { transform: none; }
+.demo-cell:not(.static):active { transform: scale(0.85); }
+
+.tutorial-arrow {
+  font-size: 1.4rem;
+  color: var(--text-dim);
+}
+
+/* Shapes preview grid */
+.shapes-preview {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.shape-preview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.shape-mini-grid {
+  display: grid;
+  gap: 2px;
+}
+
+.shape-mini-cell {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #272a6e;
+  border: 1px solid #4e52a8;
+}
+
+.shape-mini-cell.lit {
+  background: var(--sun);
+  border-color: var(--sun);
+}
+
+.shape-mini-cell.empty { background: transparent; border: none; }
+
+.shape-preview-label {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+/* Help buttons preview */
+.help-buttons-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 260px;
+}
+
+.help-button-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.help-button-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  width: 28px;
+  text-align: center;
+}
+
+.help-button-icon.hint-icon { color: var(--hint); }
+.help-button-icon.solve-icon { color: var(--solve); }
+.help-button-icon.day-icon { color: var(--sun); }
+
+.help-button-text {
+  font-size: 0.78rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.help-button-text strong { display: block; margin-bottom: 1px; }
+
+/* Tutorial footer: dots + nav */
+.tutorial-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 28px 24px;
+}
+
+.tutorial-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.tutorial-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--border2);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.tutorial-dot.active {
+  background: var(--sun);
+  transform: scale(1.3);
+}
+
+.tutorial-nav {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+}
+
+.tutorial-nav button {
+  flex: 1;
+  max-width: 140px;
+}
+
 /* ── TOAST ── */
 #toast {
   position: fixed;
@@ -440,6 +705,9 @@ button:disabled { opacity: 0.3; cursor: default; }
 
 <!-- Stars -->
 <div class="stars" id="stars"></div>
+
+<!-- Help button -->
+<button class="help-btn" id="btn-help" title="Cómo se juega">?</button>
 
 <header>
   <h1>LUCES FUERA</h1>
@@ -507,6 +775,100 @@ button:disabled { opacity: 0.3; cursor: default; }
 </div>
 
 <div id="toast"></div>
+
+<!-- Tutorial -->
+<div id="tutorial">
+  <div class="tutorial-card">
+    <div class="tutorial-slides" id="tutorial-slides">
+
+      <!-- Slide 1: Objetivo -->
+      <div class="tutorial-slide active">
+        <span class="tutorial-eyebrow">1 / 4 · El objetivo</span>
+        <div class="tutorial-title">Apaga todos los soles</div>
+        <div class="tutorial-visual">
+          <div class="demo-grid" style="grid-template-columns: repeat(1, 30px); grid-template-rows: repeat(3, 30px);">
+            <div class="demo-cell static on"></div>
+            <div class="demo-cell static on"></div>
+            <div class="demo-cell static on"></div>
+          </div>
+          <span class="tutorial-arrow">→</span>
+          <div class="demo-grid" style="grid-template-columns: repeat(1, 30px); grid-template-rows: repeat(3, 30px);">
+            <div class="demo-cell static"></div>
+            <div class="demo-cell static"></div>
+            <div class="demo-cell static"></div>
+          </div>
+        </div>
+        <p class="tutorial-text">
+          Cada celda puede estar <strong>encendida</strong> (☀️ sol) o apagada (planeta oscuro). Ganas cuando consigues que <strong>todo el tablero</strong> quede apagado.
+        </p>
+      </div>
+
+      <!-- Slide 2: Mecánica interactiva -->
+      <div class="tutorial-slide">
+        <span class="tutorial-eyebrow">2 / 4 · Cómo se juega</span>
+        <div class="tutorial-title">Toca una celda...</div>
+        <div class="tutorial-visual">
+          <div class="demo-grid" id="tut-demo-grid" style="grid-template-columns: repeat(3, 30px); grid-template-rows: repeat(3, 30px);"></div>
+        </div>
+        <p class="tutorial-text">
+          ...y se invierte su estado <strong>junto al de sus vecinas</strong> (arriba, abajo, izquierda y derecha). ¡Pruébalo! 👆
+        </p>
+        <button class="btn-ghost" id="tut-demo-reset" style="font-size:0.7rem;padding:6px 14px;">↺ Reiniciar ejemplo</button>
+      </div>
+
+      <!-- Slide 3: Formas -->
+      <div class="tutorial-slide">
+        <span class="tutorial-eyebrow">3 / 4 · Formas y dificultad</span>
+        <div class="tutorial-title">Cada día, un reto distinto</div>
+        <div class="tutorial-visual">
+          <div class="shapes-preview" id="shapes-preview"></div>
+        </div>
+        <p class="tutorial-text">
+          La forma del tablero cambia cada día: una fila, una cruz, un anillo, un diamante... La dificultad también varía un poco, pero siempre tiene solución.
+        </p>
+      </div>
+
+      <!-- Slide 4: Ayudas -->
+      <div class="tutorial-slide">
+        <span class="tutorial-eyebrow">4 / 4 · Si te atascas</span>
+        <div class="tutorial-title">Tienes ayuda disponible</div>
+        <div class="tutorial-visual">
+          <div class="help-buttons-preview">
+            <div class="help-button-row">
+              <span class="help-button-icon hint-icon">✦</span>
+              <span class="help-button-text"><strong>Pista</strong>marca en violeta la siguiente celda a pulsar</span>
+            </div>
+            <div class="help-button-row">
+              <span class="help-button-icon solve-icon">◎</span>
+              <span class="help-button-text"><strong>Solución</strong>te guía paso a paso hasta resolverlo</span>
+            </div>
+            <div class="help-button-row">
+              <span class="help-button-icon day-icon">←→</span>
+              <span class="help-button-text"><strong>Días anteriores</strong>juega los puzzles de días pasados</span>
+            </div>
+          </div>
+        </div>
+        <p class="tutorial-text">
+          Toca el botón <strong>?</strong> en cualquier momento para volver a ver esta guía.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="tutorial-footer">
+      <div class="tutorial-dots" id="tutorial-dots">
+        <span class="tutorial-dot active"></span>
+        <span class="tutorial-dot"></span>
+        <span class="tutorial-dot"></span>
+        <span class="tutorial-dot"></span>
+      </div>
+      <div class="tutorial-nav">
+        <button class="btn-ghost" id="tut-prev">← Anterior</button>
+        <button class="btn-primary" id="tut-next">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════
@@ -1044,9 +1406,136 @@ document.getElementById('btn-close-victory').addEventListener('click',hideVictor
 window.addEventListener('resize',()=>{ renderGrid(); });
 
 // ══════════════════════════════════════
+//  TUTORIAL
+// ══════════════════════════════════════
+const TUTORIAL_SLIDES = 4;
+let tutCurrentSlide = 0;
+
+function updateTutorialUI() {
+  document.querySelectorAll('.tutorial-slide').forEach((slide,i) => {
+    slide.classList.toggle('active', i === tutCurrentSlide);
+  });
+
+  document.querySelectorAll('.tutorial-dot').forEach((dot,i) => {
+    dot.classList.toggle('active', i === tutCurrentSlide);
+  });
+
+  document.getElementById('tut-prev').style.visibility = tutCurrentSlide === 0 ? 'hidden' : 'visible';
+  document.getElementById('tut-next').textContent =
+    tutCurrentSlide === TUTORIAL_SLIDES - 1 ? '¡A jugar! ☀️' : 'Siguiente →';
+}
+
+function openTutorial() {
+  tutCurrentSlide = 0;
+  updateTutorialUI();
+  document.getElementById('tutorial').classList.add('show');
+}
+
+function closeTutorial() {
+  document.getElementById('tutorial').classList.remove('show');
+  localStorage.setItem('lucesfuera_tutorial_seen', '1');
+}
+
+document.getElementById('btn-help').addEventListener('click', openTutorial);
+
+document.getElementById('tut-prev').addEventListener('click', () => {
+  if (tutCurrentSlide > 0) { tutCurrentSlide--; updateTutorialUI(); }
+});
+
+document.getElementById('tut-next').addEventListener('click', () => {
+  if (tutCurrentSlide < TUTORIAL_SLIDES - 1) { tutCurrentSlide++; updateTutorialUI(); }
+  else closeTutorial();
+});
+
+// ── Interactive 3x3 demo (slide 2) ──
+const TUT_DEMO_NEIGHBORS = (r,c) => [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
+let tutDemoState = [];
+
+function tutDemoInit() {
+  // 3x3, only center (1,1) starts ON
+  tutDemoState = Array.from({length:9}, (_,i) => i === 4);
+  renderTutDemo();
+}
+
+function renderTutDemo() {
+  const container = document.getElementById('tut-demo-grid');
+  container.innerHTML = '';
+  for (let r=0;r<3;r++) {
+    for (let c=0;c<3;c++) {
+      const i = r*3+c;
+      const div = document.createElement('div');
+      div.className = 'demo-cell' + (tutDemoState[i] ? ' on' : '');
+      div.addEventListener('click', () => {
+        const idx = r*3+c;
+        tutDemoState[idx] = !tutDemoState[idx];
+        for (const [nr,nc] of TUT_DEMO_NEIGHBORS(r,c)) {
+          if (nr>=0 && nr<3 && nc>=0 && nc<3) {
+            const ni = nr*3+nc;
+            tutDemoState[ni] = !tutDemoState[ni];
+          }
+        }
+        renderTutDemo();
+      });
+      container.appendChild(div);
+    }
+  }
+}
+
+document.getElementById('tut-demo-reset').addEventListener('click', tutDemoInit);
+
+// ── Shapes preview (slide 3) ──
+function buildShapesPreview() {
+  const container = document.getElementById('shapes-preview');
+  container.innerHTML = '';
+  const previewShapes = ['Cruz','Fila única','Anillo','Diamante'];
+
+  previewShapes.forEach(name => {
+    const {cells, cols} = buildShape(name);
+    const rows = Math.max(...cells.map(c=>c.r)) + 1;
+    const cellSet = new Set(cells.map(c=>c.id));
+
+    const item = document.createElement('div');
+    item.className = 'shape-preview-item';
+
+    const grid = document.createElement('div');
+    grid.className = 'shape-mini-grid';
+    grid.style.gridTemplateColumns = `repeat(${cols}, 8px)`;
+    grid.style.gridTemplateRows = `repeat(${rows}, 8px)`;
+
+    for (let r=0;r<rows;r++) {
+      for (let c=0;c<cols;c++) {
+        const id = `${r},${c}`;
+        const cell = document.createElement('div');
+        cell.className = 'shape-mini-cell' + (cellSet.has(id) ? ' lit' : ' empty');
+        grid.appendChild(cell);
+      }
+    }
+
+    const label = document.createElement('span');
+    label.className = 'shape-preview-label';
+    label.textContent = name;
+
+    item.appendChild(grid);
+    item.appendChild(label);
+    container.appendChild(item);
+  });
+}
+
+// Init tutorial content
+tutDemoInit();
+buildShapesPreview();
+
+// Show automatically on first visit
+if (!localStorage.getItem('lucesfuera_tutorial_seen')) {
+  setTimeout(openTutorial, 400);
+}
+
+// ══════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════
 loadDay(0);
+
+
 </script>
 </body>
 </html>
