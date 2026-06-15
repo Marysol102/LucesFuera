@@ -1341,7 +1341,7 @@ function triggerVictory(){
              : diff <= 20 ? 'COMPLETADO'
              :               'RESUELTO';
   const hintsText = state.hintsUsed === 0 ? '' : `\n✦ Pistas usadas: ${state.hintsUsed}`;
-  const shareText = `☀️ LUCES FUERA ☀️\nDía #${dayNum} · ${qual}\n${state.shapeName} · ${state.moves} toques (óptimo: ${state.optimalCount})${hintsText}`;
+  const shareText = `☀️ LUCES FUERA ☀️\nDía #${dayNum} · ${qual}\n${state.shapeName} · ${state.moves} toques (óptimo: ${state.optimalCount})${hintsText}\nhttps://goo.su/Fazl0SW`;
 
   document.getElementById('victory-subtitle').textContent = `Día #${dayNum} · ${state.shapeName}`;
   document.getElementById('victory-share').textContent = shareText;
